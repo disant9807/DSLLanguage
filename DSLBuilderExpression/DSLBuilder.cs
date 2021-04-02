@@ -6,17 +6,12 @@ using DSLSemanticModel.ComponentsModels;
 
 namespace DSLBuilderExpression
 {
-    public class DSLBuilder
-    {
-
-    }
-
 
     public class ComponentList
     {
-        public ComponentList(List<Row> rows)
+        public ComponentList(params Row[] args)
         {
-            Rows = rows?.Select((e, i) => e.Init(i + 1)).ToList() ?? new List<Row>();
+           Rows = args?.Select((e, i) => e.Init(i + 1)).ToList() ?? new List<Row>();
         }
 
         public List<Row> Rows { get; private set; }
@@ -30,9 +25,9 @@ namespace DSLBuilderExpression
 
     public class Row
     {
-        public Row(List<Column> columns)
+        public Row(params Column[] args)
         {
-            Columns = columns;
+            Columns = args.ToList();
         }
 
         public int NumberRow { get;  set; }
@@ -42,7 +37,7 @@ namespace DSLBuilderExpression
         public Row Init(int numberRow)
         {
             NumberRow = numberRow;
-            Columns.Select((e, i) => e.Init(this, i + 1));
+            Columns = Columns.Select((e, i) => e.Init(this, i + 1)).ToList();
 
             return this;
         }
@@ -50,9 +45,9 @@ namespace DSLBuilderExpression
 
     public class Column
     {
-        public Column(List<Item> items)
+        public Column(params Item[] args)
         {
-            Items = items;
+            Items = args.ToList();
         }
 
         public int NumberColumn { get; private set; }
@@ -65,7 +60,7 @@ namespace DSLBuilderExpression
         {
             Parent = parent;
             NumberColumn = numberColumn;
-            Items.Select((e, i) => e.Init(this));
+            Items = Items.Select((e, i) => e.Init(this)).ToList();
 
             return this;
         }
