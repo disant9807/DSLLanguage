@@ -19,7 +19,39 @@ namespace DSLBuilderExpression
         public string Generate()
         {
             var controller = new DSLSemanticController();
-            return controller.GenerateList("", Rows?.SelectMany(e => e.Columns?.SelectMany(z => z.Items.Select(t => t.componentListItem))).ToList());
+            var items = Rows?.SelectMany(e => e.Columns?.SelectMany(z => z.Items)).ToList();
+            List<ComponentListItem> resultItems = new List<ComponentListItem>();
+
+            foreach(var item in items)
+            {
+                resultItems.Add((item as ItemList).CreateComponentItem().componentListItem);
+            }
+
+            return controller.GenerateList("", resultItems);
+        }
+    }
+
+    public class ComponentCard
+    {
+        public ComponentCard(params Row[] rows)
+        {
+            Rows = rows?.Select((e, i) => e.Init(i + 1)).ToList() ?? new List<Row>();
+        }
+
+        public List<Row> Rows { get; private set; }
+
+        public string Generate()
+        {
+            var controller = new DSLSemanticController();
+            var items = Rows?.SelectMany(e => e.Columns?.SelectMany(z => z.Items)).ToList();
+            List<ComponentCardInfoTextItem> resultItems = new List<ComponentCardInfoTextItem>();
+
+            foreach (var item in items)
+            {
+                resultItems.Add((item as ItemCardInfo).CreateComponentItem().componentCardInfoText);
+            }
+
+            return controller.GenerateCard("", resultItems);
         }
     }
 
@@ -69,7 +101,19 @@ namespace DSLBuilderExpression
 
     public class Item
     {
-        public Item(string title = null, string text = null, string smallText = null, string date = null, string link = null)
+        public Column Parent { get; private set; }
+
+        public Item Init(Column parent)
+        {
+            Parent = parent;
+
+            return this;
+        }
+    }
+
+    public class ItemList: Item
+    {
+        public ItemList(string title = null, string text = null, string smallText = null, string date = null, string link = null)
         {
             Title = title ?? "";
             Text = text ?? "";
@@ -88,14 +132,30 @@ namespace DSLBuilderExpression
 
         public string Link { get; private set; }
 
-        public Column Parent { get; private set; }
-
         public ComponentListItem componentListItem { get; private set; }
 
-        public Item Init(Column parent)
+        public ItemList CreateComponentItem()
         {
-            Parent = parent;
-            componentListItem = new ComponentListItem(Title, Text, SmallText, Date, Link, parent.NumberColumn, parent.Parent.NumberRow);
+            componentListItem = new ComponentListItem(Title, Text, SmallText, Date, Link, Parent.NumberColumn, Parent.Parent.NumberRow);
+
+            return this;
+        }
+    }
+
+    public class ItemCardInfo : Item
+    {
+        public ItemCardInfo(string text = null)
+        {
+            Text = text ?? "";
+        }
+
+        public string Text { get; private set; }
+
+        public ComponentCardInfoTextItem componentCardInfoText { get; private set; }
+
+        public ItemCardInfo CreateComponentItem()
+        {
+            componentCardInfoText = new ComponentCardInfoTextItem(Text, Parent.NumberColumn, Parent.Parent.NumberRow);
 
             return this;
         }

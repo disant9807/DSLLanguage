@@ -34,6 +34,8 @@ namespace DSLSemanticModel.ComponentsModels
 
                 while(column < maxColumnElements)
                 {
+                    column++;
+
                     var element = Items?.FirstOrDefault(e => e.Row == rows && e.Column == column);
 
                     if (element != null)

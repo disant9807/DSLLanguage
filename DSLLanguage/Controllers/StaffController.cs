@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewEngines;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using DSLLanguage.ViewModels.Staff;
 using DSLBuilderExpression;
 
@@ -11,13 +11,10 @@ namespace DSLLanguage.Controllers
 {
     public class StaffController : Controller
     {
-        [HttpGet]
-        public IActionResult StaffList()
+        public FakeStaffListDB StaffListDB = new FakeStaffListDB
         {
-            var staff = new FakeStaffListDB
-            {
-                Title = "Сотрудники",
-                Staff = new List<FakeStaffListItemDB>
+            Title = "Сотрудники",
+            Staff = new List<FakeStaffListItemDB>
                 {
                     new FakeStaffListItemDB
                     {
@@ -60,17 +57,22 @@ namespace DSLLanguage.Controllers
                         FIO = "Горынин Бодболт Хишитбат"
                     }
                 }
-            };
+        };
 
+        [HttpGet]
+        public IActionResult StaffList()
+        {
+          
             var Builder = new ComponentList(
-                staff.Staff.Select(
+                StaffListDB.Staff.Select(
                     e => new Row(
                         new Column(
-                            new Item(
+                            new ItemList(
                                 title: e.StaffName,
                                 text: e.FIO,
                                 date: e.Date.ToString("dd mm yyy"),
-                                smallText: e.Competension
+                                smallText: e.Competension,
+                                link: Url.RouteUrl(new { controller = "Staff", id = e.Id, action = "StaffCard" })
                             )
                         )
                     )
@@ -80,6 +82,43 @@ namespace DSLLanguage.Controllers
             var modelView = new StaffListViewModel().Init(Builder.Generate());
 
             return View(nameof(StaffList), modelView);
+        }
+
+        [HttpGet]
+        public IActionResult StaffCard(int id)
+        {
+            var staff = StaffListDB?.Staff?.FirstOrDefault(e => e.Id == id);
+
+            var builder = new ComponentCard(
+                new Row(
+                    new Column(
+                        new ItemCardInfo(
+                            text: staff?.StaffName ?? "Неизвестная профессия"
+                        )
+                    ),
+                    new Column(
+                        new ItemCardInfo(
+                            text: "Дата добавления:" + staff?.Date.ToString("dd mm yyy") ?? "Неизвестная дата"
+                        )
+                    )
+                ),
+                new Row(
+                    new Column(
+                        new ItemCardInfo(
+                            text: staff?.FIO ?? "Неизвестное имя"
+                        )
+                    ),
+                    new Column(
+                        new ItemCardInfo(
+                            text: staff?.Competension ?? "Неизвестные компетенции"
+                        )
+                    )
+                )
+            );
+
+            var modelView = new StaffCardViewModel().Init(builder.Generate());
+
+            return View(nameof(StaffCard), modelView);
         }
 
 

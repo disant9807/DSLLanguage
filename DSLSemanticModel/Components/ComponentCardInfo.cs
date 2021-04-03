@@ -31,8 +31,9 @@ namespace DSLSemanticModel.Components
                 htmlBuilder.Append("<div class=\"row\">");
                 foreach (var element in rowElement)
                 {
-                    htmlBuilder.Append("<div class=\"col-1\">");
+                    htmlBuilder.Append("<div class=\"col-auto\">");
                     htmlBuilder.Append(element.Generate());
+                    htmlBuilder.Append("</div>");
                 }
                 htmlBuilder.Append("</div>");
             }

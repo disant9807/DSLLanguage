@@ -1,0 +1,10 @@
+﻿@using DSLLanguage.ViewModels.Staff;
+
+@model StaffCardViewModel;
+
+<div class="container py-12">
+    <a href="@Url.Action("staffList", "staff")" class="text-sm-left">< Назад к списку сотрудников</a>
+    <div class="d-flex justify-content-center mt-3">
+        @Html.Raw(Model.HtmlCard)
+    </div>
+</div>
